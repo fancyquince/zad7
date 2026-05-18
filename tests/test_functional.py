@@ -86,22 +86,43 @@ def test_apartment_has_any_bills():
     has_bills = manager.has_any_bills('apart-polanka', 2025, 3)
     assert has_bills == False
 
-def test_walidacja_wartosci_skrajnych_przelewow():
-    from src.models import Transfer
-    
+def test_weryfikacja_bledow_w_przelewach():
+    from src.models import Transfer, Tenant
     zarzadca = Manager(Parameters())
-    zarzadca.set_transfer_limits(10.0, 5000.0)
-    
-    p1 = Transfer(amount_pln=5.0, date="2025-01-01", settlement_year=2025, settlement_month=1, tenant="tenant-1")
-    p2 = Transfer(amount_pln=500.0, date="2025-01-02", settlement_year=2025, settlement_month=1, tenant="tenant-2")
-    p3 = Transfer(amount_pln=6000.0, date="2025-01-03", settlement_year=2025, settlement_month=1, tenant="tenant-3")
-    
+    zarzadca.tenants = {
+        "tenant-1": Tenant(
+            name="X",
+            apartment="Y",
+            room="Z",
+            rent_pln=100.0,
+            deposit_pln=200.0,
+            date_agreement_from="2024-01-01",
+            date_agreement_to="2024-12-31"
+        )
+    }
+    p1 = Transfer(
+        amount_pln=100.0,
+        date="2024-05-01",
+        settlement_year=2024,
+        settlement_month=5,
+        tenant="tenant-1"
+    )
+    p2 = Transfer(
+        amount_pln=100.0,
+        date="2025-05-01",
+        settlement_year=2025,
+        settlement_month=5,
+        tenant="tenant-1"
+    )
+    p3 = Transfer(
+        amount_pln=100.0,
+        date="2024-05-01",
+        settlement_year=2024,
+        settlement_month=5,
+        tenant="tenant-brak"
+    )
     zarzadca.transfers = [p1, p2, p3]
-    
-    bledy = zarzadca.validate_transfers()
-    
-    assert isinstance(bledy, list)
-    assert len(bledy) == 2
-    assert p1 in bledy
-    assert p3 in bledy
-    assert p2 not in bledy
+    wynik = zarzadca.znajdz_bledne_przelewy()
+    assert p1 not in wynik
+    assert p2 in wynik
+    assert p3 in wynik
