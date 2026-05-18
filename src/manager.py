@@ -119,3 +119,13 @@ class Manager:
             entry["name"] == tenant_name
             for entry in getattr(self, "blacklist", [])
         )
+    
+    def validate_transfer(self, transfer):
+        if transfer.tenant not in self.tenants:
+            return False
+
+        tenant = self.tenants[transfer.tenant]
+        if transfer.settlement_year is None or transfer.settlement_month is None:
+            return False
+
+        return True
