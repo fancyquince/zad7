@@ -114,4 +114,19 @@ class Manager:
         return any([bill for bill in self.bills if bill.apartment == apartment_key and bill.settlement_year == year and bill.settlement_month == month])
     
     def znajdz_bledne_przelewy(self) -> list:
-        return []
+        bledne = []
+
+        for transfer in self.transfers:
+            if transfer.tenant not in self.tenants:
+                bledne.append(transfer)
+                continue
+            tenant = self.tenants[transfer.tenant]
+
+            if transfer.settlement_year is None or transfer.settlement_month is None:
+                bledne.append(transfer)
+                continue
+            transfer_date = f"{transfer.settlement_year}-{transfer.settlement_month:02d}"
+
+            if not (tenant.date_agreement_from <= transfer_date <= tenant.date_agreement_to):
+                bledne.append(transfer)
+        return bledne
