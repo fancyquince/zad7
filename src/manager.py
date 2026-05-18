@@ -3,13 +3,13 @@ from typing import List, Tuple
 
 class Manager:
     def __init__(self, parameters: Parameters):
-        self.parameters = parameters 
+        self.parameters = parameters
 
         self.apartments = {}
         self.tenants = {}
         self.transfers = []
         self.bills = []
-       
+      
         self.load_data()
 
     def load_data(self):
@@ -72,7 +72,7 @@ class Manager:
                 year=apartment_settlement.year,
                 total_due_pln=apartment_settlement.total_due_pln / len(tenants_in_apartment)
             )
-        for tenant in tenants_in_apartment ] 
+        for tenant in tenants_in_apartment ]
     
     def get_debtors(self, apartment_key: str, year: int, month: int) -> List[str]:
         if month < 1 or month > 12:
