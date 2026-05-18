@@ -85,3 +85,23 @@ def test_apartment_has_any_bills():
 
     has_bills = manager.has_any_bills('apart-polanka', 2025, 3)
     assert has_bills == False
+
+def test_walidacja_wartosci_skrajnych_przelewow():
+    from src.models import Transfer
+    
+    zarzadca = Manager(Parameters())
+    zarzadca.set_transfer_limits(10.0, 5000.0)
+    
+    p1 = Transfer(amount_pln=5.0, date="2025-01-01", settlement_year=2025, settlement_month=1, tenant="tenant-1")
+    p2 = Transfer(amount_pln=500.0, date="2025-01-02", settlement_year=2025, settlement_month=1, tenant="tenant-2")
+    p3 = Transfer(amount_pln=6000.0, date="2025-01-03", settlement_year=2025, settlement_month=1, tenant="tenant-3")
+    
+    zarzadca.transfers = [p1, p2, p3]
+    
+    bledy = zarzadca.validate_transfers()
+    
+    assert isinstance(bledy, list)
+    assert len(bledy) == 2
+    assert p1 in bledy
+    assert p3 in bledy
+    assert p2 not in bledy
